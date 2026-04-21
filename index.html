@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <title>รายงานผลการปฏิบัติงานกีฬา • จังหวัดหนองบัวลำภู</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="lov"><div class="spc"></div><p style="font-size:12px;color:#64748b;">กำลังโหลดข้อมูล...</p></div>
+<div class="toast" id="toast"><span id="tico"></span><span id="tmsg"></span></div>
+
+<!-- ═══ LOGIN MODAL ═══ -->
+<div class="modal-overlay" id="login-modal">
+  <div class="login-box">
+    <button class="modal-close" onclick="closeLoginModal()">✕</button>
+    <div class="login-logo">🔐</div>
+    <div class="login-title">เข้าสู่ระบบกรอกข้อมูล</div>
+    <div class="login-sub">โครงการส่งเสริมการกีฬาเพื่อพัฒนาชาติไทย • จังหวัดหนองบัวลำภู</div>
+    <div class="pw-wrap">
+      <input type="password" id="login-pw" placeholder="รหัสผ่าน" onkeydown="if(event.key==='Enter')doLogin()"/>
+      <button class="pw-eye" onclick="togglePw()">👁</button>
+    </div>
+    <button class="login-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- ═══ CONFIRM MODAL ═══ -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="confirm-box">
+    <div class="confirm-icon">🗑️</div>
+    <div class="confirm-title">ยืนยันการล้างข้อมูล</div>
+    <div class="confirm-sub">ข้อมูลที่กรอกไว้ทั้งหมดจะถูกลบออก ไม่สามารถกู้คืนได้</div>
+    <div class="confirm-row">
+      <button class="confirm-cancel" onclick="closeConfirm()">ยกเลิก</button>
+      <button class="confirm-ok" onclick="doReset()">ล้างข้อมูล</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MAIN APP ═══════════════ -->
+<div id="main-app">
+
+<!-- HEADER ROW 1 -->
+<div class="hdr-top">
+  <div class="hdr-left">
+    <img src="https://lh3.googleusercontent.com/d/1lcAdQKyFnYrFuMqPnp3TaYJYoJOFM9Kf"
+         class="hdr-logo" alt="โลโก้"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
+    <div class="hdr-logo-placeholder" style="display:none;">🏆</div>
+  </div>
+  <div class="hdr-center">
+    <div class="hdr-title">
+      <h1>รายงานผลการปฏิบัติของคณะกรรมการกีฬาประจำจังหวัด</h1>
+      <div class="sub">ตามโครงการส่งเสริมการกีฬาเพื่อพัฒนาชาติไทย ในพระบรมราชูปถัมภ์ &nbsp;•&nbsp; จังหวัดหนองบัวลำภู &nbsp;•&nbsp; <span id="period-label"></span></div>
+    </div>
+    <div class="hdr-photos">
+      <img src="https://lh3.googleusercontent.com/d/1zDkhHd8VJGcjgPI1YU0WgXMkTNzN4CyI" class="hdr-photo" alt="กีฬา1" onerror="this.style.background='#c7d2fe';"/>
+      <img src="https://lh3.googleusercontent.com/d/1iEVO5veWNkeg0g2Lc-OUm5_lWWcLL0El" class="hdr-photo" alt="กีฬา2" onerror="this.style.background='#bbf7d0';"/>
+      <img src="https://lh3.googleusercontent.com/d/1fkgjVunv9NSM8Z5T8WWnsTo3wc0FHS67" class="hdr-photo" alt="กีฬา3" onerror="this.style.background='#fde68a';"/>
+      <img src="https://lh3.googleusercontent.com/d/1gsZkFV2hUu1OACcEVfsJOyWF0X-D3tR5" class="hdr-photo" alt="กีฬา4" onerror="this.style.background='#fecaca';"/>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER ROW 2 -->
+<div class="hdr-bot">
+  <div class="tabs">
+    <button class="tab on" onclick="switchTab('dash')" id="tab-dash">📊 ภาพรวม</button>
+    <button class="tab" onclick="switchTab('entry')" id="tab-entry">📝 กรอกข้อมูล <span id="lock-icon" style="font-size:11px;opacity:.6;">🔒</span></button>
+  </div>
+  <div class="ctrl-row" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;padding:6px 16px;">
+    <!-- View mode toggle -->
+    <div style="display:flex;border:1.5px solid #334155;border-radius:9px;overflow:hidden;flex-shrink:0;margin:0;">
+      <button id="btn-monthly" onclick="setViewMode('monthly')"
+        style="font-family:'Sarabun',sans-serif;font-size:11px;font-weight:700;padding:0 11px;height:34px;border:none;cursor:pointer;transition:all .15s;background:#2563eb;color:#fff;">
+        รายเดือน
+      </button>
+      <button id="btn-yearly" onclick="setViewMode('yearly')"
+        style="font-family:'Sarabun',sans-serif;font-size:11px;font-weight:700;padding:0 11px;height:34px;border:none;cursor:pointer;transition:all .15s;background:#1e293b;color:#64748b;">
+        ทั้งปีงบประมาณ
+      </button>
+    </div>
+    <!-- District filter -->
+    <div class="fp" style="border-color:#7c3aed;">
+      <div class="fp-lbl" style="background:#7c3aed;">
+        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        ขอบเขต
+      </div>
+      <select id="sel-district" onchange="onDistrictChange()" style="font-family:'Sarabun',sans-serif;font-size:12px;font-weight:700;color:#5b21b6;background:transparent;border:none;outline:none;cursor:pointer;padding:0 7px;height:34px;">
+        <option value="province:">ทั้งจังหวัด (รวมหน่วยงาน)</option>
+        <option value="district:">ทุกอำเภอ</option>
+        <option value="district:เมืองหนองบัวลำภู">อ.เมืองหนองบัวลำภู</option>
+        <option value="district:นากลาง">อ.นากลาง</option>
+        <option value="district:ศรีบุญเรือง">อ.ศรีบุญเรือง</option>
+        <option value="district:สุวรรณคูหา">อ.สุวรรณคูหา</option>
+        <option value="district:โนนสัง">อ.โนนสัง</option>
+        <option value="district:นาวัง">อ.นาวัง</option>
+      </select>
+    </div>
+    <!-- Fiscal picker -->
+    <div class="fp">
+      <div class="fp-lbl">
+        <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5C3.9 4 3 4.9 3 6v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg>
+        ปีงบประมาณ
+      </div>
+      <select id="sel-month" onchange="onPeriodChange()">
+        <option value="9">ตุลาคม</option><option value="10">พฤศจิกายน</option>
+        <option value="11">ธันวาคม</option><option value="0">มกราคม</option>
+        <option value="1">กุมภาพันธ์</option><option value="2">มีนาคม</option>
+        <option value="3">เมษายน</option><option value="4">พฤษภาคม</option>
+        <option value="5">มิถุนายน</option><option value="6">กรกฎาคม</option>
+        <option value="7">สิงหาคม</option><option value="8">กันยายน</option>
+      </select>
+      <div class="fp-div"></div>
+      <select id="sel-year" onchange="onPeriodChange()">
+        <option>2566</option><option>2567</option><option>2568</option><option selected>2569</option><option>2570</option>
+      </select>
+    </div>
+    <!-- Export -->
+    <button class="export-btn" onclick="exportCSV()" title="ส่งออก CSV">⬇️ Export</button>
+  </div>
+</div>
+
+<!-- ═══ DASHBOARD ═══ -->
+<div class="pg on" id="pg-dash">
+<div class="wrap">
+  <div class="errbanner" id="errbanner"></div>
+  <div class="kpi-grid">
+    <div class="kpi kpi-blue">
+      <div class="kpi-top"><span class="kpi-ico">📋</span><span class="kpi-badge kpi-blue">รายการ</span></div>
+      <div class="kpi-lbl">กิจกรรมทั้งหมด</div>
+      <div class="kpi-val" id="kpi-total">-</div>
+      <div class="kpi-sfx">กิจกรรม</div>
+    </div>
+    <div class="kpi kpi-green">
+      <div class="kpi-top"><span class="kpi-ico">⚡</span><span class="kpi-badge kpi-green" id="kpi-active-badge">เดือนนี้</span></div>
+      <div class="kpi-lbl" id="kpi-active-lbl">ดำเนินการเดือนนี้</div>
+      <div class="kpi-val" id="kpi-active">-</div>
+      <div class="kpi-sfx">รายการ</div>
+    </div>
+    <div class="kpi kpi-indigo">
+      <div class="kpi-top"><span class="kpi-ico">📊</span><span class="kpi-badge kpi-indigo" id="kpi-monthly-badge">ประจำเดือน</span></div>
+      <div class="kpi-lbl" id="kpi-monthly-lbl">ผลงานประจำเดือน</div>
+      <div class="kpi-val" id="kpi-monthly">-</div>
+      <div class="kpi-sfx">ครั้ง/คน</div>
+    </div>
+    <div class="kpi kpi-amber">
+      <div class="kpi-top"><span class="kpi-ico">🏆</span><span class="kpi-badge kpi-amber">สะสม</span></div>
+      <div class="kpi-lbl">ผลงานสะสมรวม</div>
+      <div class="kpi-val" id="kpi-cumul">-</div>
+      <div class="kpi-sfx">ครั้ง/คน</div>
+    </div>
+  </div>
+
+  <!-- inner tabs -->
+  <div class="inner-tabs">
+    <button class="inner-tab on" onclick="switchInner('overview')" id="itab-overview">📊 ภาพรวมกิจกรรม</button>
+    <button class="inner-tab" onclick="switchInner('compare')" id="itab-compare">🏘️ เปรียบเทียบรายอำเภอ</button>
+  </div>
+
+  <!-- Overview panel -->
+  <div id="panel-overview">
+    <div class="charts-row" style="grid-template-columns:1fr 300px;">
+      <div class="card card-accent" style="border-left-color:#2563eb;">
+        <div class="sec">ผลการดำเนินงานประจำเดือนตามแผนงาน/กิจกรรม</div>
+        <div id="bar-list"></div>
+      </div>
+      <div class="card card-accent" style="border-left-color:#7c3aed;">
+        <div class="sec">Top 5 กิจกรรมสะสม</div>
+        <div class="donut-wrap">
+          <div style="position:relative;width:150px;height:150px;">
+            <canvas id="chartDonut"></canvas>
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;">
+              <div style="font-size:10px;color:#64748b;">สะสมรวม</div>
+              <div id="donut-total" style="font-size:14px;font-weight:700;color:#0f172a;"></div>
+            </div>
+          </div>
+          <div id="donut-legend" style="width:100%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+        <div class="sec" style="margin-bottom:0">รายละเอียดกิจกรรม <span id="row-count" style="font-weight:400;color:#94a3b8;"></span></div>
+        <button class="export-btn" onclick="exportCSV()" style="font-size:10px;">⬇️ ดาวน์โหลด CSV</button>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th onclick="srt('id')">#</th>
+            <th onclick="srt('name')">กิจกรรม</th>
+            <th onclick="srt('unit')">หน่วย</th>
+            <th onclick="srt('monthly')" class="nr">เดือนนี้</th>
+            <th onclick="srt('cumulative')" class="nr">สะสม</th>
+            <th>สถานะ</th>
+          </tr></thead>
+          <tbody id="tbl-body"></tbody>
+          <tfoot><tr>
+            <td colspan="3">รวมทั้งหมด</td>
+            <td class="nr" id="ft-m"></td>
+            <td class="nr" id="ft-c"></td>
+            <td></td>
+          </tr></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Compare panel -->
+  <div id="panel-compare" style="display:none;">
+    <div class="card">
+      <div class="sec">เปรียบเทียบผลงานรายอำเภอ — <span id="compare-period-lbl" style="font-weight:400;text-transform:none;"></span></div>
+      <div id="compare-loading" style="text-align:center;padding:24px;color:#94a3b8;font-size:13px;">กำลังโหลดข้อมูลเปรียบเทียบ...</div>
+      <div class="compare-wrap" style="display:none;" id="compare-content">
+        <canvas id="chartCompare" style="min-height:280px;"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec">ตารางเปรียบเทียบรายอำเภอ</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th>อำเภอ</th>
+            <th class="nr">ผลงานเดือนนี้</th>
+            <th class="nr">ผลงานสะสม</th>
+            <th class="nr">กิจกรรมที่ดำเนินการ</th>
+          </tr></thead>
+          <tbody id="compare-tbl-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="ft">โครงการส่งเสริมกีฬาเพื่อพัฒนาชาติไทย ในพระบรมราชูปถัมภ์ • จังหวัดหนองบัวลำภู</div>
+</div>
+</div>
+
+<!-- ═══ DATA ENTRY ═══ -->
+<div class="pg" id="pg-entry">
+<div class="wrap-sm">
+
+  <div class="entry-header">
+    <div class="entry-header-ico">🏛️</div>
+    <div class="entry-header-info">
+      <div class="entry-header-district" id="entry-district-name">อำเภอ...</div>
+      <div class="entry-header-sub">กรอกข้อมูลผลการปฏิบัติงานประจำเดือน</div>
+    </div>
+    <button class="entry-logout" onclick="doLogout()">🔓 ออกจากระบบ</button>
+  </div>
+
+  <!-- Admin slicer -->
+  <div id="admin-slicer-wrap" style="display:none;background:#fff3cd;border:1.5px solid #fbbf24;border-radius:var(--r);padding:14px;margin-bottom:14px;">
+    <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:10px;">⚙️ Admin — เลือกหน่วยงานที่ต้องการกรอกข้อมูล</div>
+    <div style="font-size:10px;font-weight:700;color:#92400e;margin-bottom:6px;letter-spacing:.04em;">🏛 จังหวัด / อำเภอ</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+      <button class="dist-btn" data-d="จังหวัดหนองบัวลำภู" onclick="selectDistrict(this)" style="border-color:#2563eb;color:#1e40af;font-weight:700;">🏛 จังหวัดหนองบัวลำภู</button>
+      <button class="dist-btn" data-d="เมืองหนองบัวลำภู" onclick="selectDistrict(this)">เมืองหนองบัวลำภู</button>
+      <button class="dist-btn" data-d="นากลาง" onclick="selectDistrict(this)">นากลาง</button>
+      <button class="dist-btn" data-d="ศรีบุญเรือง" onclick="selectDistrict(this)">ศรีบุญเรือง</button>
+      <button class="dist-btn" data-d="สุวรรณคูหา" onclick="selectDistrict(this)">สุวรรณคูหา</button>
+      <button class="dist-btn" data-d="โนนสัง" onclick="selectDistrict(this)">โนนสัง</button>
+      <button class="dist-btn" data-d="นาวัง" onclick="selectDistrict(this)">นาวัง</button>
+    </div>
+    <div style="font-size:10px;font-weight:700;color:#92400e;margin-bottom:6px;letter-spacing:.04em;">🏢 หน่วยงาน</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+      <button class="dist-btn" data-d="สพป. หนองบัวลำภู เขต 1" onclick="selectDistrict(this)">สพป. เขต 1</button>
+      <button class="dist-btn" data-d="สพป. หนองบัวลำภู เขต 2" onclick="selectDistrict(this)">สพป. เขต 2</button>
+      <button class="dist-btn" data-d="สพม. เลย-หนองบัวลำภู" onclick="selectDistrict(this)">สพม. เลย-นภ.</button>
+      <button class="dist-btn" data-d="องค์การบริหารส่วนจังหวัดหนองบัวลำภู" onclick="selectDistrict(this)">อบจ. นภ.</button>
+      <button class="dist-btn" data-d="เทศบาลเมืองหนองบัวลำภู" onclick="selectDistrict(this)">ทม. นภ.</button>
+      <button class="dist-btn" data-d="ท่องเที่ยวและกีฬาจังหวัดหนองบัวลำภู" onclick="selectDistrict(this)">ท่องเที่ยวและกีฬา</button>
+    </div>
+    <div id="admin-selected-district" style="font-size:12px;color:#92400e;margin-top:10px;min-height:16px;font-weight:600;"></div>
+  </div>
+
+  <div class="period-card">
+    <label>📅 เลือกรอบรายงาน (ปีงบประมาณ)</label>
+    <div class="fp" style="border-color:#059669;">
+      <div class="fp-lbl" style="background:#059669;">
+        <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5C3.9 4 3 4.9 3 6v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg>
+        ปีงบประมาณ
+      </div>
+      <select id="e-sel-month" onchange="syncFromEntry()" style="font-family:'Sarabun',sans-serif;font-size:12px;font-weight:700;color:#065f46;background:#fff;border:none;outline:none;cursor:pointer;padding:0 8px;height:34px;">
+        <option value="9">ตุลาคม</option><option value="10">พฤศจิกายน</option>
+        <option value="11">ธันวาคม</option><option value="0">มกราคม</option>
+        <option value="1">กุมภาพันธ์</option><option value="2">มีนาคม</option>
+        <option value="3">เมษายน</option><option value="4">พฤษภาคม</option>
+        <option value="5">มิถุนายน</option><option value="6">กรกฎาคม</option>
+        <option value="7">สิงหาคม</option><option value="8">กันยายน</option>
+      </select>
+      <div class="fp-div" style="background:#a7f3d0;"></div>
+      <select id="e-sel-year" onchange="syncFromEntry()" style="font-family:'Sarabun',sans-serif;font-size:12px;font-weight:700;color:#065f46;background:#fff;border:none;outline:none;cursor:pointer;padding:0 8px;height:34px;">
+        <option>2566</option><option>2567</option><option>2568</option><option selected>2569</option><option>2570</option>
+      </select>
+    </div>
+    <div class="pdis" id="entry-pdis"></div>
+  </div>
+
+  <div class="pbar" id="pbar"><div class="pfill" id="pfill"></div></div>
+
+  <div class="fcard">
+    <div class="fcard-hdr">
+      <h2>กิจกรรมตามแผนงาน (1–14)</h2>
+      <span class="cbdg" id="filled-count">กรอกแล้ว 0 / 14 รายการ</span>
+    </div>
+    <div class="tbl-wrap">
+      <table class="tbl-form">
+        <thead><tr>
+          <th>#</th>
+          <th>กิจกรรม / หน่วยนับ</th>
+          <th style="text-align:right;color:#1d4ed8;">เดือนนี้</th>
+          <th style="text-align:right;color:#5b21b6;">สะสม</th>
+        </tr></thead>
+        <tbody id="form-body"></tbody>
+        <tfoot><tr>
+          <td colspan="2" style="font-size:11px;font-weight:600;color:#64748b;">รวม (1–14)</td>
+          <td style="font-size:13px;font-weight:700;text-align:right;" id="ef-m">0</td>
+          <td style="font-size:13px;font-weight:700;text-align:right;" id="ef-c">0</td>
+        </tr></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="extra-section">
+    <h3>15. กิจกรรมอื่นๆ <span style="font-weight:400;color:#94a3b8;font-size:11px;">(ระบุชื่อกิจกรรมพร้อมผลงาน)</span></h3>
+    <div style="display:grid;grid-template-columns:1fr 95px 95px 32px;gap:8px;margin-bottom:6px;padding:0 2px;">
+      <div style="font-size:10px;font-weight:600;color:#94a3b8;">ชื่อกิจกรรม</div>
+      <div style="font-size:10px;font-weight:600;color:#1d4ed8;text-align:right;">เดือนนี้</div>
+      <div style="font-size:10px;font-weight:600;color:#5b21b6;text-align:right;">สะสม</div>
+      <div></div>
+    </div>
+    <div id="extra-list"></div>
+    <button class="add-extra-btn" onclick="addExtra()">
+      <span style="font-size:16px;">＋</span> เพิ่มกิจกรรมอื่นๆ
+    </button>
+  </div>
+
+  <div class="act-row">
+    <button class="btn btn-p" id="btn-sub" onclick="submitData()">
+      <div class="spin" id="spin"></div>
+      <span id="btn-lbl">📤 บันทึกลง Google Sheets</span>
+    </button>
+    <button class="btn btn-danger" onclick="confirmReset()">🗑️ ล้างข้อมูล</button>
+    <span class="save-status" id="save-status"></span>
+  </div>
+</div>
+</div>
+
+</div><!-- /main-app -->
+
+<script src="script.js"></script>
+
+</body>
+</html>
