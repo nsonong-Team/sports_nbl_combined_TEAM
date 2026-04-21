@@ -1,4 +1,4 @@
-const URL_GAS = 'https://script.google.com/macros/s/AKfycbxoucwYX2kFyC7lHQBZ8WhNi0GroJ_o84L5bG2GyDAuqAtqTda6GKVgLgNAbvSHUxSc/exec';
+const URL_SPORT = 'https://script.google.com/macros/s/AKfycbyXrjgNFpof24bSQFsCA4X5mnZGsr3jjhZcAcMl1O0kI11f06ObMDEknaFifASdD7DNLA/exec';
 const MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 const PAL = ['#2563eb','#4f46e5','#7c3aed','#0891b2','#059669'];
 const COMPARE_COLORS = ['#2563eb','#059669','#d97706','#dc2626','#7c3aed','#0891b2'];
@@ -204,10 +204,10 @@ async function loadData(){
   const district=districtVal||'';
   let url;
   if(iy){
-    url=`${URL_GAS}?fiscalYear=${encodeURIComponent(year)}&scope=${scope}`;
+    url=`${URL_SPORT}?fiscalYear=${encodeURIComponent(year)}&scope=${scope}`;
     document.getElementById('period-label').textContent=`ปีงบประมาณ ${year}`;
   } else {
-    url=`${URL_GAS}?period=${encodeURIComponent(getPeriod())}&scope=${scope}`;
+    url=`${URL_SPORT}?period=${encodeURIComponent(getPeriod())}&scope=${scope}`;
     document.getElementById('period-label').textContent=getPeriod();
   }
   if(district) url+=`&district=${encodeURIComponent(district)}`;
@@ -356,9 +356,9 @@ async function loadCompare(){
   for(const d of DISTRICTS){
     let url;
     if(iy){
-      url=`${URL_GAS}?fiscalYear=${encodeURIComponent(year)}&scope=district&district=${encodeURIComponent(d)}`;
+      url=`${URL_SPORT}?fiscalYear=${encodeURIComponent(year)}&scope=district&district=${encodeURIComponent(d)}`;
     } else {
-      url=`${URL_GAS}?period=${encodeURIComponent(getPeriod())}&scope=district&district=${encodeURIComponent(d)}`;
+      url=`${URL_SPORT}?period=${encodeURIComponent(getPeriod())}&scope=district&district=${encodeURIComponent(d)}`;
     }
     try{
       const j=await jsonp(url);
@@ -547,7 +547,18 @@ async function submitData(){
   try{
     prog(70);
     const payload=encodeURIComponent(JSON.stringify({period:getEntryPeriod(),district,activities:all}));
-    const j=await jsonp(`${URL_GAS}?action=save&data=${payload}`);
+    
+    const res = await fetch(URL_SPORT, {
+      method: 'POST',
+      body: JSON.stringify({
+        period: getEntryPeriod(),
+        district,
+        activities: all
+      })
+    });
+
+    const j = await res.json();
+
     prog(100);
     if(j.success){
       showSaveStatus(true,`✅ บันทึกสำเร็จ ${j.saved||all.length} รายการ`);
