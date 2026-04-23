@@ -1,0 +1,180 @@
+/* ── LOGIN MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, .75);
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+.login-box {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 28px;
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  position: relative;
+}
+
+.login-logo {
+  font-size: 42px;
+  margin-bottom: 10px;
+}
+
+.login-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 3px;
+}
+
+.login-sub {
+  font-size: 11px;
+  color: #64748b;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.pw-wrap {
+  position: relative;
+  margin-bottom: 18px;
+}
+
+.pw-wrap input {
+  width: 100%;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 14px;
+  color: #0f172a;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: var(--r2);
+  padding: 10px 40px 10px 14px;
+  outline: none;
+}
+
+.pw-wrap input:focus {
+  border-color: #2563eb;
+  background: #fff;
+}
+
+.pw-eye {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #94a3b8;
+  font-size: 15px;
+  padding: 0;
+}
+
+.login-btn {
+  width: 100%;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  background: #2563eb;
+  border: none;
+  border-radius: var(--r2);
+  padding: 11px;
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.login-btn:hover {
+  background: #1d4ed8;
+}
+
+.login-err {
+  font-size: 11px;
+  color: #dc2626;
+  margin-top: 8px;
+  min-height: 16px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #94a3b8;
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* ── CONFIRM MODAL ── */
+.confirm-box {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px 24px;
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+}
+
+.confirm-icon {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.confirm-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+
+.confirm-sub {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.confirm-row {
+  display: flex;
+  gap: 10px;
+}
+
+.confirm-row button {
+  flex: 1;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px;
+  border-radius: var(--r2);
+  border: none;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.confirm-cancel {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.confirm-cancel:hover {
+  background: #e2e8f0;
+}
+
+.confirm-ok {
+  background: #dc2626;
+  color: #fff;
+}
+
+.confirm-ok:hover {
+  background: #b91c1c;
+}
